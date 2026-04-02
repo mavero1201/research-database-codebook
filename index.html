@@ -1,48 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Data Encoding Application</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <title>Кодирование данных</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
-        <h1>Data Encoding Application</h1>
+        <h1>🔧 Приложение для кодирования данных</h1>
+        <p>Инструмент для автоматической кодировки исследовательских данных</p>
     </header>
     <main>
         <section>
-            <h2>Upload Files</h2>
+            <h2>📁 Загрузка файлов</h2>
             <div class="upload-area" id="codebook-upload">
-                <h3>Upload Codebook</h3>
-                <input type="file" id="codebook-file" accept=".csv, .xls, .xlsx">
+                <h3>📋 Загрузить кодбук</h3>
+                <input type="file" id="codebook-file" accept=".csv">
+                <button class="btn-upload" onclick="document.getElementById('codebook-file').click()">Выбрать кодбук</button>
             </div>
             <div class="upload-area" id="data-upload">
-                <h3>Upload Data File</h3>
+                <h3>📊 Загрузить данные</h3>
                 <input type="file" id="data-file" accept=".csv, .xls, .xlsx">
+                <button class="btn-upload" onclick="document.getElementById('data-file').click()">Выбрать данные</button>
             </div>
         </section>
         <section>
-            <h2>Data Preview</h2>
+            <h2>👁️ Предпросмотр</h2>
             <table id="data-preview">
-                <thead>
-                    <tr>
-                        <th>Column 1</th>
-                        <th>Column 2</th>
-                        <th>Column 3</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Data will be populated here -->
-                </tbody>
+                <tbody><tr><td>Загрузите файл...</td></tr></tbody>
             </table>
         </section>
         <section>
-            <h2>Actions</h2>
-            <button id="validate-data">Validate Data</button>
-            <button id="export-data">Export Data</button>
+            <h2>⚙️ Действия</h2>
+            <button class="btn-primary" onclick="validateData()">✅ Проверить</button>
+            <button class="btn-primary" onclick="exportData()">📥 Скачать</button>
+        </section>
+        <section id="status-section" style="display: none;">
+            <div id="status-message"></div>
         </section>
     </main>
+    <script src="script.js"></script>
 </body>
 </html>
