@@ -1,69 +1,98 @@
 'use strict';
 
-// Function to parse CSV file and extract validation rules
-function parseCSVCodebook(csvFile) {
-    const validationRules = [];
-    // Logic to parse CSV and fill validationRules
-    return validationRules;
+let codebookData = null;
+let rawData = null;
+
+document.getElementById('codebook-file').addEventListener('change', handleCodebookUpload);
+document.getElementById('data-file').addEventListener('change', handleDataUpload);
+
+function handleCodebookUpload() {
+    const file = document.getElementById('codebook-file').files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            codebookData = parseCSV(e.target.result);
+            showStatus('✅ Кодбук загружен! ' + codebookData.length + ' правил');
+        } catch (error) {
+            showStatus('❌ Ошибка: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
 }
 
-// Function to parse Excel data file using SheetJS
-function parseExcelData(excelFile) {
-    const workbook = XLSX.readFile(excelFile);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(sheet);
+function handleDataUpload() {
+    const file = document.getElementById('data-file').files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            rawData = parseCSV(e.target.result);
+            displayDataPreview(rawData);
+            showStatus('✅ Данные загружены! ' + rawData.length + ' строк');
+        } catch (error) {
+            showStatus('❌ Ошибка: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function parseCSV(csvText) {
+    const lines = csvText.trim().split('\n');
+    if (lines.length === 0) return [];
+    const headers = lines[0].split(',').map(h => h.trim());
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+        const obj = {};
+        const currentLine = lines[i].split(',');
+        for (let j = 0; j < headers.length; j++) {
+            obj[headers[j]] = currentLine[j] ? currentLine[j].trim() : '';
+        }
+        data.push(obj);
+    }
     return data;
 }
 
-// Function to validate each cell against codebook rules
-function validateData(data, validationRules) {
-    const errors = [];
-    // Logic to validate data against validationRules
-    return errors;
+function displayDataPreview(data) {
+    if (!data || data.length === 0) return;
+    const table = document.getElementById('data-preview');
+    const headers = Object.keys(data[0]);
+    let html = '<thead><tr>' + headers.map(h => '<th>' + h + '</th>').join('') + '</tr></thead><tbody>';
+    for (let i = 0; i < Math.min(5, data.length); i++) {
+        html += '<tr>' + headers.map(h => '<td>' + (data[i][h] || '') + '</td>').join('') + '</tr>';
+    }
+    html += '</tbody>';
+    table.innerHTML = html;
 }
 
-// Function to apply encoding rules to data
-function encodeData(data, validationRules) {
-    const encodedData = [];
-    // Logic to encode data
-    return encodedData;
-}
-
-// Function to generate validation report
-function generateValidationReport(errors) {
-    // Logic to create a validation report
-    return report;
-}
-
-// Function to export encoded data as Excel file
-function exportEncodedData(encodedData) {
-    const ws = XLSX.utils.json_to_sheet(encodedData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Encoded Data');
-    XLSX.writeFile(wb, 'encoded_data.xlsx');
-}
-
-// Drag-and-drop file upload handlers
-function setupDragAndDrop() {
-    const dropArea = document.getElementById('drop-area');
-
-    dropArea.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        dropArea.classList.add('highlight');
+function validateData() {
+    if (!codebookData) { showStatus('❌ Загрузите кодбук'); return; }
+    if (!rawData) { showStatus('❌ Загрузите данные'); return; }
+    let errors = 0, warnings = 0;
+    rawData.forEach((row, i) => {
+        Object.keys(row).forEach(key => {
+            if (!row[key]) warnings++;
+        });
     });
-
-    dropArea.addEventListener('dragleave', () => {
-        dropArea.classList.remove('highlight');
-    });
-
-    dropArea.addEventListener('drop', (event) => {
-        event.preventDefault();
-        dropArea.classList.remove('highlight');
-        const files = event.dataTransfer.files;
-        // Handle file uploads
-    });
+    showStatus('✅ Проверка завершена! Ошибок: ' + errors + ', Предупреждений: ' + warnings);
 }
 
-// Initialize application
-document.addEventListener('DOMContentLoaded', setupDragAndDrop);
-console.log('Data Encoding Application Initialized');
+function exportData() {
+    if (!rawData) { showStatus('❌ Загрузите данные'); return; }
+    let csv = Object.keys(rawData[0]).join(',') + '\n';
+    rawData.forEach(row => {
+        csv += Object.values(row).map(v => '"' + (v || '') + '"').join(',') + '\n';
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'данные_' + new Date().getTime() + '.csv';
+    link.click();
+    showStatus('✅ Данные скачаны!');
+}
+
+function showStatus(msg) {
+    const section = document.getElementById('status-section');
+    document.getElementById('status-message').textContent = msg;
+    section.style.display = 'block';
+}
