@@ -1,4 +1,4 @@
-# Project Documentation for Research Database Codebook
+# Project Documentation for Research Database Codebook 
 
 ## Project Description
 This project serves as a comprehensive database codebook for organizing research variables effectively. It includes guidelines for variable encoding, instructions for importing data into Excel, and a detailed description of the data structure.
